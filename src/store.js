@@ -1,16 +1,15 @@
 /*createStore from redux - is now deprecated and should only be used for learning purposes */
-import { createStore } from "redux";
+import { combineReducers, createStore } from "redux";
 
-const initialState = {
+const initialStateAccount = {
   balance: 0,
   loan: 0,
   loanPurpose: "",
 };
 
-/*The redux setup code is similar to the useReducer hook. However, here we put it
- all into a single file such as "store.js" and on the reducer, we pass the 
- initial state directly as the default state. */
-function reducer(state = initialState, action) {
+const initialStateCustomer = { fullName: "", nationalID: "", createdAt: "" };
+
+function accountReducer(state = initialStateAccount, action) {
   switch (action.type) {
     case "account/deposit":
       return { ...state, balance: state.balance + action.payload };
@@ -36,16 +35,34 @@ function reducer(state = initialState, action) {
   }
 }
 
-const store = createStore(reducer);
+function customerReducer(state = initialStateCustomer, action) {
+  switch (action.type) {
+    case "customer/createCustomer":
+      return {
+        ...state,
+        fullName: action.payload.fullName,
+        nationalID: action.payload.nationalID,
+        createdAt: action.payload.createdAt,
+      };
+    case "customer/updateName":
+      return { ...state, fullName: action.payload };
+    default:
+      return state;
+  }
+}
 
-// store.dispatch({ type: "account/deposit", payload: 500 });
-// store.dispatch({ type: "account/withdraw", payload: 200 });
-// store.dispatch({
-//   type: "account/requestLoan",
-//   payload: { amount: 1000, purpose: "Buy a car" },
-// });
-// store.dispatch({ type: "account/payLoan" });
+const rootReducer = combineReducers({
+  account: accountReducer,
+  customer: customerReducer,
+});
+const store = createStore(rootReducer);
 
+/*Rather than creating to separate stores, we can combine them into a single
+store under two sepate state values*/
+// const accountStore = createStore(accountReducer);
+// const customerStore = createStore(customerReducer);
+
+/*Account - actionCreators */
 function deposit(amount) {
   return { type: "account/deposit", payload: amount };
 }
@@ -63,7 +80,23 @@ function payLoan() {
   return { type: "account/payLoan" };
 }
 
-/*To avoid typos, we can create methods that will return the type well written consistently*/
+/*Customer - actionCreators */
+function createCustomer(fullName, nationalID) {
+  return {
+    type: "customer/createCustomer",
+    payload: {
+      fullName,
+      nationalID,
+      createdAt: new Date().toISOString(),
+    },
+  };
+}
+
+function updateName(fullName) {
+  return { type: "customer/updateName", payload: fullName };
+}
+
+/*account dispatching */
 store.dispatch(deposit(500));
 console.log(store.getState());
 
@@ -74,4 +107,11 @@ store.dispatch(requestLoan(1000, "Buy a cheap car"));
 console.log(store.getState());
 
 store.dispatch(payLoan());
+console.log(store.getState());
+
+/*Customer dispatching */
+store.dispatch(createCustomer("Marco Tulio", "0105199700081"));
+console.log(store.getState());
+
+store.dispatch(updateName("Marco Julio"));
 console.log(store.getState());

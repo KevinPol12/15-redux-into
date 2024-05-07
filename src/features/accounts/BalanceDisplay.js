@@ -1,3 +1,5 @@
+import { connect } from "react-redux";
+
 function formatCurrency(value) {
   return new Intl.NumberFormat("en", {
     style: "currency",
@@ -5,8 +7,17 @@ function formatCurrency(value) {
   }).format(value);
 }
 
-function BalanceDisplay() {
-  return <div className="balance">{formatCurrency(123456)}</div>;
+function BalanceDisplay({ balance }) {
+  return <div className="balance">{formatCurrency(balance)}</div>;
 }
 
-export default BalanceDisplay;
+/*This is the old way of connecting the redux store to a component that needs to consume 
+the redux store state rather than the most modern useSelector*/
+function mapStateToProps(state) {
+  return {
+    balance: state.account.balance,
+  };
+}
+
+export default connect(mapStateToProps)(BalanceDisplay);
+//https://react-redux.js.org/using-react-redux/connect-mapstate

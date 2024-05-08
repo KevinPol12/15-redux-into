@@ -13,6 +13,7 @@ const accountSlice = createSlice({
   reducers: {
     deposit(state, action) {
       state.balance += action.payload;
+      state.isLoading = false;
     },
     withdraw(state, action) {
       state.balance -= action.payload;
@@ -31,16 +32,41 @@ const accountSlice = createSlice({
         state.balance += action.payload.amount;
       },
     },
-    payLoan(state, action) {
+    payLoan(state) {
       state.balance -= state.loan;
       state.loan = 0;
       state.loanPurpose = "";
+    },
+    convertingCurrency(state) {
+      state.isLoading = true;
     },
   },
 });
 
 /*Exporting the new actions*/
-export const { deposit, withdraw, requestLoan, payLoan } = accountSlice.actions;
+export const { withdraw, requestLoan, payLoan } = accountSlice.actions;
+
+/*Exporting the action that uses Thunk to fetch data and skipping it from the
+accountSlice.actions export */
+export function deposit(amount, currency) {
+  if (currency === "USD") return { type: "account/deposit", payload: amount };
+
+  /*The action creator allows to pass type of actions easier and also to return
+        functions that thunks middleware enables - where we can return a function rather than
+        only a action object - this function will be then executed and then dispatch the
+        action object with the fetched data*/
+  return async function (dispatch, getState) {
+    //API call
+    dispatch({ type: "account/convertingCurrency" });
+    const res = await fetch(
+      `https://api.frankfurter.app/latest?amount=${amount}&from=${currency}&to=USD`
+    );
+    const data = await res.json();
+
+    dispatch({ type: "account/deposit", payload: data.rates.USD });
+  };
+  //return action
+}
 
 /*Exporting the reducer slice */
 export default accountSlice.reducer;

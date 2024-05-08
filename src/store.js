@@ -3,14 +3,17 @@ import { applyMiddleware, combineReducers, createStore } from "redux";
 import { thunk } from "redux-thunk";
 import customerReducer from "./features/customers/customerSlice";
 import accountReducer from "./features/accounts/accountSlice";
+import { composeWithDevTools } from "redux-devtools-extension";
 
 const rootReducer = combineReducers({
   account: accountReducer,
   customer: customerReducer,
 });
 
-/*1.) To use thunk as middleware we first import {thunk} and then apply it
-as Middleware to the redux store, now we are good to use it*/
-const store = createStore(rootReducer, applyMiddleware(thunk));
+/*Wiring the redux-devtools*/
+const store = createStore(
+  rootReducer,
+  composeWithDevTools(applyMiddleware(thunk))
+);
 
 export default store;

@@ -10,7 +10,7 @@ function App() {
     <div>
       <h1>🏦 The React-Redux Bank ⚛️</h1>
       {!fullName && <CreateCustomer />}
-      {fullName && (
+      {!fullName && (
         <>
           <Customer />
           <AccountOperations />
